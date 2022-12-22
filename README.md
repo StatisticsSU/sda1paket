@@ -1,4 +1,3 @@
-# R-paket för kurserna Statistisk dataanalys I och II, 30 hp
+# R-paket för kurserna Statistik och dataanalys I och II, 30 hp
 
-R-paketet innehåller hjälpfunktioner för en introduktionskurs i statistik som använder R.
-Kursen kommer att ges vid stockholms universitet fr o m VT2023.  
+R-paketet innehåller hjälpfunktioner för kurspaketet Statistik I, 30 hp, vid Stockholms universitet.
