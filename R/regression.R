@@ -143,11 +143,70 @@ pred_interval_reg <- function(lmobject, conf_int_line = T, pred_interval = T,
          box.lty=1
   )
 
+
+  # Table with estimated coefficients etc
+  if (param){
+    # Confidence intervals on parameters
+    if (conf_intervals){
+      param_table = cbind(glmsummary$coefficients, suppressMessages(confint(glmobject)))
+    }else
+    {
+      param_table = glmsummary$coefficients
+    }
+
+    # Variance inflation factors
+    if (vif_factors & k>1){
+      vif = rep(NA,k)
+      for (j in 1:k){
+        vif[j] = 1/(1-summary(lm(X[,j] ~ data.matrix(X[,-j])))$r.squared)
+      }
+      if (intercept) vif = c(NA,vif)
+      param_table = cbind(param_table,vif)
+      colnames(param_table)[ncol(param_table)] = "VIF"
+    }
+
+    {cat("\nParameter estimates\n------------------------------------------------\n");
+      print(param_table, digits = 5, na.print = "")}
+
+  }else{param_table = NA}
+
+
+
+  # Table with odds ratios etc
+  if (odds_ratio){
+    # Confidence intervals on parameters
+    if (conf_intervals){
+      odds_ratio_table = cbind(exp(glmsummary$coef[,1:2]),glmsummary$coef[,3:4], exp(suppressMessages(confint.default(glmobject))))
+    }else
+    {
+      odds_ratio_table = cbind(exp(glmsummary$coef[,1:2]),glmsummary$coef[,3:4])
+    }
+
+    # Variance inflation factors
+    if (vif_factors & k>1){
+      vif = rep(NA,k)
+      for (j in 1:k){
+        vif[j] = 1/(1-summary(lm(X[,j] ~ data.matrix(X[,-j])))$r.squared)
+      }
+      if (intercept) vif = c(NA,vif)
+      odds_ratio_table = cbind(odds_ratio_table,vif)
+      colnames(odds_ratio_table)[ncol(odds_ratio_table)] = "VIF"
+    }
+
+    {cat("\nOdds ratio estimates\n------------------------------------------------\n");
+      print(odds_ratio_table, digits = 5, na.print = "")}
+
+  }else{odds_ratio_table = NA}
+
+
+  invisible(list(param = param_table, odds_ratio = odds_ratio_table))
+
   return(data.frame(xgrid = datagrid[,1],
                     CI_low = CI[,2], CI_high = CI[,3],
                     PI_low = PI[,2], PI_high = PI[,3]
   )
   )
+
 }
 
 #' Simulate from a linear regression model
@@ -200,6 +259,44 @@ regsimulate <- function(n, betavect, sigma_eps, intercept = TRUE, covdist = 'nor
   return(data)
 }
 
+#' K-fold cross-validation of regression models estimated with lm()
+#'
+#' @param formula an object of class "formula": a symbolic description of the model to be fitted.
+#' @param data a data frame with the data used for fitting the models.
+#' @param nfolds the number of folds in the cross-validation.
+#' @param obs_order order of the observations when splitting the data. obs_order = "random" gives a random order.
+#' @return RMSE Root mean squared prediction error on test data
+#' @export
+#' @examples
+#' library(regkurs)
+#' RMSE_CV = reg_crossval(mpg ~ hp, data = mtcars, nfolds = 4, obs_order = 1:32)
+#' print(RMSE_CV)
+reg_crossval <- function(formula, data, nfolds, obs_order = "random"){
+
+  n = dim(data)[1]
+  if (is.character(obs_order)) obs_order = sample(1:n)
+
+  obs_per_fold = ceiling(n/nfolds)
+  yhat = matrix(NA, obs_per_fold, nfolds)
+  if (n %% nfolds == 0){
+    test_obs_matrix = matrix(obs_order, obs_per_fold) # k:th column contains test for fold k
+  }else{
+    nobs_last_fold = n-obs_per_fold*(nfolds-1)
+    test_obs_matrix = matrix(NA, obs_per_fold, nfolds)
+    test_obs_matrix[,1:(nfolds-1)] = matrix(obs_order[obs_per_fold*(nfolds-1)], obs_per_fold)
+    test_obs_matrix[1:nobs_last_fold, nfolds] = obs_order[(obs_per_fold*(nfolds-1)+1):n]
+  }
+  for (k in 1:nfolds){
+    testfold = test_obs_matrix[,k][!is.na(test_obs_matrix[,k])]
+    trainingfold = setdiff(obs_order,testfold)
+    fit = lm(formula, data = data[trainingfold,])
+    yhat[1:length(testfold),k] = predict(fit, newdata = data[testfold,])
+  }
+  yhat = c(yhat)[!is.na(c(yhat))]
+  yordered = data[all.names(formula)[2]][obs_order,]
+  RMSE = sqrt(sum((yordered - yhat)^2)/n)
+}
+
 
 #' Summarize the results from a logistic regression analysis
 #'
@@ -245,7 +342,7 @@ logisticregsummary <- function(glmobject, odds_ratio = T, param = T, conf_interv
   if (odds_ratio){
     # Confidence intervals on parameters
     if (conf_intervals){
-      odds_ratio_table = cbind(exp(glmsummary$coef[,1:2]),glmsummary$coef[,3:4], exp(suppressMessages(confint(glmobject))))
+      odds_ratio_table = cbind(exp(glmsummary$coef[,1:2]),glmsummary$coef[,3:4], exp(suppressMessages(confint.default(glmobject))))
     }else
     {
       odds_ratio_table = cbind(exp(glmsummary$coef[,1:2]),glmsummary$coef[,3:4])
