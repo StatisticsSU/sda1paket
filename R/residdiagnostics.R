@@ -15,7 +15,7 @@
 #' For more than 9 regressors than it will produce one by one plot. If the independent variable is kvalitative, transform first as factor and than it will automatically produce a boxplot.
 #' @export
 #' @examples
-#' library(sdakurs)
+#' library(sda1)
 #' lmfit = lm(nRides ~ temp + hum + windspeed, data = bike)
 #' res.diagnostics(lmfit) #6 plots together
 #' res.diagnostics(lmfit,block=T)#all the plots in one panel

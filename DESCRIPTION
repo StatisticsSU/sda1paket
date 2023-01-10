@@ -1,10 +1,10 @@
-Package: sdakurs
-Title: Package for a basic course in Statistics
+Package: sda1
+Title: R-paket för kursen Statistik och dataanalys I vid SU
 Version: 0.0.1
 Authors@R: 
     person("Mattias", "Villani", , "mattias.villani@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0003-2786-2519"))
-Description: Functions for basic stats, including regression.
+Description: Funktioner för grundläggande statistik, inkl regression.
 License: MIT
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

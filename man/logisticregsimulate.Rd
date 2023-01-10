@@ -38,7 +38,7 @@ between all pairs of covariates. Covariate x_j has standard deviation \code{sigm
 Alternatively the covariate can follow a uniform distribution.
 }
 \examples{
-library(regkurs)
+library(sda1)
 simdata <- logisticregsimulate(n = 500, betavect = c(1, -2, 1, 0))
 glmfit <- glm(y ~ X1 + X2 + X3, data = simdata, family = binomial)
 logisticregsummary(glmfit, odds_ratio = F)

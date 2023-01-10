@@ -1,3 +1,3 @@
-# R-paket för Statistik och dataanalys I och II
+# R-paket för Statistik och dataanalys I
 
-R-paketet innehåller hjälpfunktioner för kurspaketet Statistik I, 30 hp, vid Stockholms universitet.
+R-paketet innehåller hjälpfunktioner för kursen Statistik och dataanalys I, 15 hp, vid Stockholms universitet.

@@ -11,7 +11,7 @@
 #' @return list with three tables: param, anova and fit_measures
 #' @export
 #' @examples
-#' library(sdakurs)
+#' library(sda1)
 #' lmfit = lm(nRides ~ temp + hum + windspeed, data = bike)
 #' regsumm = regsummary(lmfit, anova = T, conf_intervals = T, vif_factors = T)
 #' regsumm$param
@@ -95,7 +95,7 @@ regsummary <- function(lmobject, anova = T,  fit_measures = T, param = T,
 #' @return data frame with confidence and prediction intervals over xGrid
 #' @export
 #' @examples
-#' library(sdakurs)
+#' library(sda1)
 #' lmfit = lm(mpg ~ hp, data = mtcars)
 #' res = pred_interval_reg(lmfit)
 pred_interval_reg <- function(lmobject, conf_int_line = T, pred_interval = T,
@@ -227,7 +227,7 @@ pred_interval_reg <- function(lmobject, conf_int_line = T, pred_interval = T,
 #' @return dataframe with simulated data (y, X1, X2, ..., XK) (no intercept included).
 #' @export
 #' @examples
-#' library(sdakurs)
+#' library(sda1)
 #' simdata <- regsimulate(n = 500, betavect = c(1, -2, 1, 0), sigma_eps = 2)
 #' lmfit <- lm(y ~ X1 + X2 + X3, data = simdata)
 #' regsummary(lmfit, anova = F)
@@ -268,7 +268,7 @@ regsimulate <- function(n, betavect, sigma_eps, intercept = TRUE, covdist = 'nor
 #' @return RMSE Root mean squared prediction error on test data
 #' @export
 #' @examples
-#' library(sdakurs)
+#' library(sda1)
 #' RMSE_CV = reg_crossval(mpg ~ hp, data = mtcars, nfolds = 4, obs_order = 1:32)
 #' print(RMSE_CV)
 reg_crossval <- function(formula, data, nfolds, obs_order = "random"){
@@ -309,7 +309,7 @@ reg_crossval <- function(formula, data, nfolds, obs_order = "random"){
 #' @return list with two tables: param, odds_ratio
 #' @export
 #' @examples
-#' library(sdakurs)
+#' library(sda1)
 #' glmfit <- glm(survived ~ age + sex + firstclass, data = titanic, family = binomial)
 #' logisticregsummary(glmfit)
 logisticregsummary <- function(glmobject, odds_ratio = T, param = T, conf_intervals = F){
@@ -380,7 +380,7 @@ logisticregsummary <- function(glmobject, odds_ratio = T, param = T, conf_interv
 #' @return dataframe with simulated data (y, X1, X2, ..., XK) (no intercept included).
 #' @export
 #' @examples
-#' library(sdakurs)
+#' library(sda1)
 #' simdata <- logisticregsimulate(n = 500, betavect = c(1, -2, 1, 0))
 #' glmfit <- glm(y ~ X1 + X2 + X3, data = simdata, family = binomial)
 #' logisticregsummary(glmfit, odds_ratio = F)

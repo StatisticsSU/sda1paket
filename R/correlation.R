@@ -6,7 +6,7 @@
 #' @return list with two tables: corrs (correlations), pvals (p-values)
 #' @export
 #' @examples
-#' library(sdakurs)
+#' library(sda1)
 #' corr.matrix(bike[,c("temp","hum","windspeed")])
 corr.matrix <- function(df){
   p = dim(df)[2]

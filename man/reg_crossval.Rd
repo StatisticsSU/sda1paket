@@ -22,7 +22,7 @@ RMSE Root mean squared prediction error on test data
 K-fold cross-validation of regression models estimated with lm()
 }
 \examples{
-library(regkurs)
+library(sda1)
 RMSE_CV = reg_crossval(mpg ~ hp, data = mtcars, nfolds = 4, obs_order = 1:32)
 print(RMSE_CV)
 }

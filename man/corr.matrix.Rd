@@ -17,6 +17,6 @@ Computes pair-wise correlations between variables in a dataframe df
 Tests H0: rho = 0 vs H1: rho!=0 by computing p-values.
 }
 \examples{
-library(regkurs)
+library(sda1)
 corr.matrix(bike[,c("temp","hum","windspeed")])
 }

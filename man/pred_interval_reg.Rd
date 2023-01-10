@@ -30,7 +30,7 @@ data frame with confidence and prediction intervals over xGrid
 Plot prediction intervals for simple linear regression \cr
 }
 \examples{
-library(regkurs)
+library(sda1)
 lmfit = lm(mpg ~ hp, data = mtcars)
 res = pred_interval_reg(lmfit)
 }

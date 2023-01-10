@@ -41,7 +41,7 @@ between all pairs of covariates. Covariate \eqn{x_j}{x_j} has standard deviation
 Alternatively the covariate can follow a uniform distribution.
 }
 \examples{
-library(regkurs)
+library(sda1)
 simdata <- regsimulate(n = 500, betavect = c(1, -2, 1, 0), sigma_eps = 2)
 lmfit <- lm(y ~ X1 + X2 + X3, data = simdata)
 regsummary(lmfit, anova = F)
