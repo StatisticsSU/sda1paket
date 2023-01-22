@@ -13,11 +13,11 @@
 #' @examples
 #' library(sda1)
 #' lmfit = lm(nRides ~ temp + hum + windspeed, data = bike)
-#' regsumm = regsummary(lmfit, anova = T, conf_intervals = T, vif_factors = T)
+#' regsumm = reg_summary(lmfit, anova = T, conf_intervals = T, vif_factors = T)
 #' regsumm$param
 #' regsumm$anova
 #' regsumm$fit_measures
-regsummary <- function(lmobject, anova = T,  fit_measures = T, param = T,
+reg_summary <- function(lmobject, anova = T,  fit_measures = T, param = T,
                        conf_intervals = F, vif_factors = F){
 
   if ("(Intercept)" %in% names(lmobject$coefficients)) intercept = 1 else intercept = 0
@@ -84,129 +84,44 @@ regsummary <- function(lmobject, anova = T,  fit_measures = T, param = T,
   invisible(list(param = param_table, anova = anova_table, fit_measures = fit_table))
 }
 
-
-#' Plot prediction intervals for simple linear regression \cr
+#' Plot confidence and prediction intervals for simple linear regression \cr
 #'
-#' @param lmobject a fitted regression model from `lm`.
+#' @param formula an object of class "formula": a symbolic description of the model to be fitted.
+#' @param data a data frame with the data.
+#' @param level confidence level, default is level = 0.95
 #' @param conf_int_line if TRUE, then conf intervals for regression line are plotted.
 #' @param pred_interval if TRUE, then prediction intervals are plotted.
-#' @param level confidence level, default is level = 0.95
-#' @param ngrid number of grid points over which the intervals are computed
-#' @return data frame with confidence and prediction intervals over xGrid
+#' @return plot of data with overlayed intervals
 #' @export
 #' @examples
 #' library(sda1)
-#' lmfit = lm(mpg ~ hp, data = mtcars)
-#' res = pred_interval_reg(lmfit)
-pred_interval_reg <- function(lmobject, conf_int_line = T, pred_interval = T,
-                              level = 0.95, ngrid = 100){
-  y = lmobject$model[,1]
-  x = lmobject$model[,2]
-  yname = names(lmobject$model)[1]
-  xname = names(lmobject$model)[2]
-  xmingrid = min(x) - 0.01*(max(x)-min(x))
-  xmaxgrid = max(x) + 0.01*(max(x)-min(x))
-  datagrid = data.frame(seq(xmingrid, xmaxgrid, length = ngrid))
-  names(datagrid) <- xname
-  CI =  predict.lm(lmobject, newdata = datagrid,
-                   interval = "confidence", level = level)
-  PI =  predict.lm(lmobject, newdata = datagrid,
-                   interval = "prediction", level = level)
+#' reg_predict(mpg ~ hp, data = mtcars)
+reg_predict <- function(formula, data, level = 0.95,
+                             conf_int_line = T, pred_interval = T){
 
-  plot(x, y, type="n", xlab = xname, ylab = yname, cex = 0.7,
-       ylim = c(min(CI,PI), max(CI,PI)), xlim = c(xmingrid,xmaxgrid),
-       main = "Regression - Confidence and Prediction intervals"
-  )
-  if (pred_interval){
-    polygon(c(datagrid[,1], rev(datagrid[,1])), c(PI[,2], rev(PI[,3])),
-            col = rgb(173/255, 216/255, 230/255, 0.4), border = 0)
-  }
-  if (conf_int_line){
-    lines(datagrid[,1], CI[,2], col = rgb(160/255, 32/255, 240/255), lwd = 2)
-    lines(datagrid[,1], CI[,3], col = rgb(160/255, 32/255, 240/255), lwd = 2)
-  }
-  lines(c(xmingrid, xmaxgrid),
-        c(lmobject$coef[1] + lmobject$coef[2]*xmingrid,
-          lmobject$coef[1] + lmobject$coef[2]*xmaxgrid),
-        col = rgb(0/255, 0/255, 139/255), lwd = 3)
-  points(x, y, pch = 19, cex = 0.7)
+  fit <- lm(formula, data = data)
+  data <- cbind(data, suppressWarnings(
+                  predict(fit, data = data, interval = "prediction",
+                  level = level)))
 
-  legend(x = "topright", inset=.05,
-         legend = c("Data", "Regression line","C.I.", "P.I."),
-         pch = c(19,NA,NA,NA), pt.lwd = c(1,3,2,2), lty = c(0,1,1,0),
-         fill = c(NA,NA,NA, rgb(173/255, 216/255, 230/255, 0.4)),
-         border = c(0,0,0,0),
-         col = c("black",
-                 rgb(0/255, 0/255, 139/255),
-                 rgb(160/255, 32/255, 240/255),
-                 rgb(173/255, 216/255, 230/255, 0.4)),
-         box.lty=1
-  )
-
-
-  # Table with estimated coefficients etc
-  if (param){
-    # Confidence intervals on parameters
-    if (conf_intervals){
-      param_table = cbind(glmsummary$coefficients, suppressMessages(confint(glmobject)))
-    }else
-    {
-      param_table = glmsummary$coefficients
-    }
-
-    # Variance inflation factors
-    if (vif_factors & k>1){
-      vif = rep(NA,k)
-      for (j in 1:k){
-        vif[j] = 1/(1-summary(lm(X[,j] ~ data.matrix(X[,-j])))$r.squared)
-      }
-      if (intercept) vif = c(NA,vif)
-      param_table = cbind(param_table,vif)
-      colnames(param_table)[ncol(param_table)] = "VIF"
-    }
-
-    {cat("\nParameter estimates\n------------------------------------------------\n");
-      print(param_table, digits = 5, na.print = "")}
-
-  }else{param_table = NA}
-
-
-
-  # Table with odds ratios etc
-  if (odds_ratio){
-    # Confidence intervals on parameters
-    if (conf_intervals){
-      odds_ratio_table = cbind(exp(glmsummary$coef[,1:2]),glmsummary$coef[,3:4], exp(suppressMessages(confint.default(glmobject))))
-    }else
-    {
-      odds_ratio_table = cbind(exp(glmsummary$coef[,1:2]),glmsummary$coef[,3:4])
-    }
-
-    # Variance inflation factors
-    if (vif_factors & k>1){
-      vif = rep(NA,k)
-      for (j in 1:k){
-        vif[j] = 1/(1-summary(lm(X[,j] ~ data.matrix(X[,-j])))$r.squared)
-      }
-      if (intercept) vif = c(NA,vif)
-      odds_ratio_table = cbind(odds_ratio_table,vif)
-      colnames(odds_ratio_table)[ncol(odds_ratio_table)] = "VIF"
-    }
-
-    {cat("\nOdds ratio estimates\n------------------------------------------------\n");
-      print(odds_ratio_table, digits = 5, na.print = "")}
-
-  }else{odds_ratio_table = NA}
-
-
-  invisible(list(param = param_table, odds_ratio = odds_ratio_table))
-
-  return(data.frame(xgrid = datagrid[,1],
-                    CI_low = CI[,2], CI_high = CI[,3],
-                    PI_low = PI[,2], PI_high = PI[,3]
-  )
-  )
-
+  p <- ggplot(data, aes(x = .data[[names(fit$model)[2]]],
+                        y = .data[[names(fit$model)[1]]])) +
+    {if (pred_interval) geom_ribbon(aes(ymin = lwr, ymax = upr),
+                          fill = prettycol[1], alpha = 0.3)
+    } +
+    {if (conf_int_line) suppressMessages(stat_smooth(method = "lm",
+                          se = T, level = level,
+                          color = prettycol[4], fill = prettycol[2]))
+    else{geom_abline(aes(intercept = fit$coefficients[1],
+                           slope = fit$coefficients[2]),
+                           color = prettycol[2])}
+    } +
+    geom_point(color = prettycol[2], size = 1) +
+    ggtitle("Konfidens- och prediktionsintervall") +
+    theme_light() +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank())
+  return(p)
 }
 
 #' Simulate from a linear regression model
@@ -228,10 +143,10 @@ pred_interval_reg <- function(lmobject, conf_int_line = T, pred_interval = T,
 #' @export
 #' @examples
 #' library(sda1)
-#' simdata <- regsimulate(n = 500, betavect = c(1, -2, 1, 0), sigma_eps = 2)
+#' simdata <- reg_simulate(n = 500, betavect = c(1, -2, 1, 0), sigma_eps = 2)
 #' lmfit <- lm(y ~ X1 + X2 + X3, data = simdata)
-#' regsummary(lmfit, anova = F)
-regsimulate <- function(n, betavect, sigma_eps, intercept = TRUE, covdist = 'normal',
+#' reg_summary(lmfit, anova = F)
+reg_simulate <- function(n, betavect, sigma_eps, intercept = TRUE, covdist = 'normal',
                         rho_x = 0, sigma_x = rep(1,length(betavect)-intercept)){
 
   k = length(betavect) - intercept
@@ -297,119 +212,70 @@ reg_crossval <- function(formula, data, nfolds, obs_order = "random"){
   RMSE = sqrt(sum((yordered - yhat)^2)/n)
 }
 
-
-#' Summarize the results from a logistic regression analysis
+#' Residual analysis mimicing the 4-in-1 plots from Minitab
 #'
-#' Alternative to `summary.glm` to summarize a regression from `glm`.
-#' Prints a table similar to the one generated by SAS and Minitab.
-#' @param glmobject a fitted regression model from `glm`.
-#' @param odds_ratio `TRUE` if odds ratios for parameters is computed.
-#' @param param `TRUE` if parameter estimates, standard errors etc is computed.
-#' @param conf_intervals `TRUE` if confidence intervals for parameters.
-#' @return list with two tables: param, odds_ratio
+#' Plots:
+#' 1) Normal QQ-plot
+#' 2) Residuals vs fitted values
+#' 3) Histogram and normal density fit
+#' 4) Residuals vs order.
+#' @param lm_object a fitted regression model from `lm`.
 #' @export
 #' @examples
 #' library(sda1)
-#' glmfit <- glm(survived ~ age + sex + firstclass, data = titanic, family = binomial)
-#' logisticregsummary(glmfit)
-logisticregsummary <- function(glmobject, odds_ratio = T, param = T, conf_intervals = F){
+#' fit = lm(mpg ~ hp, data = mtcars)
+#' residuals4in1(fit)
 
-  if ("(Intercept)" %in% names(glmobject$coefficients)) intercept = 1 else intercept = 0
+residuals4in1 <- function(lm_object){
 
-  glmsummary = summary(glmobject)
-  data = model.matrix(glmobject)
-  X = data[,-1]
-  k = ncol(X) # number of covariates, excluding intercept
+  n = dim(lm_object$model)[1]
 
-  # Table with estimated coefficients etc
-  if (param){
-    # Confidence intervals on parameters
-    if (conf_intervals){
-      param_table = cbind(glmsummary$coefficients, suppressMessages(confint(glmobject)))
-    }else
-    {
-      param_table = glmsummary$coefficients
-    }
+  # adding residuals and fit to the data frame
+  lm_object$model$residuals <- resid(lm_object)
+  lm_object$model$fitted <- fitted(lm_object)
+  lm_object$model$obsnumber <- 1:n
 
-    {cat("\nParameter estimates\n------------------------------------------------\n");
-      print(param_table, digits = 5, na.print = "")}
+  p1 = lm_object$model %>%
+    ggplot(aes(sample = residuals)) +
+    stat_qq_line(color = prettycol[4]) +
+    stat_qq(color = prettycol[2], size = 1) +
+    ylab("residuals") +
+    theme_light()
 
-  }else{param_table = NA}
-
-
-
-  # Table with odds ratios etc
-  if (odds_ratio){
-    # Confidence intervals on parameters
-    if (conf_intervals){
-      odds_ratio_table = cbind(exp(glmsummary$coef[,1:2]),glmsummary$coef[,3:4], exp(suppressMessages(confint.default(glmobject))))
-    }else
-    {
-      odds_ratio_table = cbind(exp(glmsummary$coef[,1:2]),glmsummary$coef[,3:4])
-    }
-
-    {cat("\nOdds ratio estimates\n------------------------------------------------\n");
-      print(odds_ratio_table, digits = 5, na.print = "")}
-
-  }else{odds_ratio_table = NA}
+  p2 = lm_object$model %>%
+    ggplot(aes(x = fitted, y = residuals)) +
+    geom_hline(aes(yintercept = 0), color = prettycol[4]) +
+    geom_point(color = prettycol[2], size = 1) +
+    xlab("fitted value") +
+    ylab("residual") +
+    theme_light() +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank())
 
 
-  invisible(list(param = param_table, odds_ratio = odds_ratio_table))
+  p3 = lm_object$model %>%
+    ggplot(aes(x = residuals)) +
+    geom_histogram(aes(y = after_stat(density)),
+                   bins = 1 + log(n,2), fill = prettycol[1]) +
+    geom_density(kernel = "gaussian", color = prettycol[4]) +
+    theme_light() +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank())
+
+  p4 = lm_object$model %>%
+    ggplot(aes(x = obsnumber, y = residuals)) +
+    geom_hline(aes(yintercept = 0), color = prettycol[4]) +
+    geom_path(color = prettycol[1]) +
+    geom_point(color = prettycol[2], size = 1)  +
+    xlab("observation number") +
+    theme_light() +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank())
+
+  plot_grid(p1, p2, p3, p4)
+
+  #plt <- list(p1,p2,p3,p4)
 }
 
-
-
-
-
-
-
-#' Simulate from a logistic regression model
-#'
-#' Simulates a dataset with `n` observation from the logistic regression model \cr
-#' \deqn{\mathrm{Pr}(y = 1 | x) = \frac{1}{1 + \exp(-(\beta_0 + \beta_1x_1 + \ldots + \beta_k x_k))}}{Pr(y = 1 | x) = 1/(1 + exp(-(\beta_0 + \beta_1 * x_1 + ... + \beta_k * x_k)))}
-#' with covariates (x) simulated from a normal distribution with the same correlation `rho_x` \cr
-#' between all pairs of covariates. Covariate x_j has standard deviation `sigma_x[j]`. \cr
-#' Alternatively the covariate can follow a uniform distribution.
-#' @param n the number of observations in the simulated dataset.
-#' @param betavect a vector with regression coefficients
-#' c(beta_0,beta_1,...beta_k). First element is intercept if `intercept = TRUE`
-#' @param intercept if `TRUE` an intercept is added to the model.
-#' @param covdist distribution of the covariates. Options: `'normal'` or `'uniform'`.
-#' @param rho_x correlation among the covariates. Same for all covariate pairs.
-#' @param sigma_x vector with standard deviation of the covariates.
-#' @return dataframe with simulated data (y, X1, X2, ..., XK) (no intercept included).
-#' @export
-#' @examples
-#' library(sda1)
-#' simdata <- logisticregsimulate(n = 500, betavect = c(1, -2, 1, 0))
-#' glmfit <- glm(y ~ X1 + X2 + X3, data = simdata, family = binomial)
-#' logisticregsummary(glmfit, odds_ratio = F)
-logisticregsimulate <- function(n, betavect, intercept = TRUE, covdist = 'normal',
-                        rho_x = 0, sigma_x = rep(1,length(betavect)-intercept)){
-
-  k = length(betavect) - intercept
-
-  # Generate covariates
-  if (covdist == 'normal'){
-    rho = matrix(rho_x, k, k)
-    diag(rho) <- 1
-    sigma = diag(sigma_x)%*%rho%*%diag(sigma_x)
-    X = mvtnorm::rmvnorm(n, sigma = sigma)
-  }else{
-    X = matrix(runif(n*k), n, k)
-    if (rho_x != 0) warning("uniformly distributed covariates are always uncorrelated")
-  }
-  if (intercept) X = cbind(1,X)
-
-  # Simulate binary responses
-  y = rbinom(n, 1, prob = 1/(1 + exp(-X%*%betavect)))
-
-  if (intercept) X = X[,-1] # remove intercept in the returned dataset
-  data = data.frame(cbind(y,X))
-  xnames = rep(NA,k)
-  for (j in 1:k) xnames[j] = paste("X",j, sep = "")
-  names(data) <- c("y", xnames)
-  return(data)
-}
 
 
