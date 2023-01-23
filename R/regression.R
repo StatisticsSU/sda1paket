@@ -224,9 +224,9 @@ reg_crossval <- function(formula, data, nfolds, obs_order = "random"){
 #' @examples
 #' library(sda1)
 #' fit = lm(mpg ~ hp, data = mtcars)
-#' residuals4in1(fit)
+#' reg_residuals(fit)
 
-residuals4in1 <- function(lm_object){
+reg_residuals <- function(lm_object){
 
   n = dim(lm_object$model)[1]
 
