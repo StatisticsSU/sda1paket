@@ -9,6 +9,7 @@ A data frame with 25 rows and 2 variables:
 \describe{
 \item{vinst}{amount in each winning class}
 \item{antal}{number of tickets in each winning class}
+\item{probs}{probability for each winning class}
 ...
 }
 }

@@ -50,6 +50,7 @@
 #' \describe{
 #'   \item{vinst}{amount in each winning class}
 #'   \item{antal}{number of tickets in each winning class}
+#'   \item{probs}{probability for each winning class}
 #'   ...
 #' }
 #' @source Svenska spel \url{https://www.svenskaspel.se/triss/spelguide/triss-30}.
