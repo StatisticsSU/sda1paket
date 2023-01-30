@@ -41,3 +41,17 @@
 #' }
 #' @source Dawson, Robert J. MacG. (1995), The ‘Unusual Episode’ Data Revisited. Journal of Statistics Education, 3. doi: 10.1080/10691898.1995.11910499.
 "titanic"
+
+#' Winnings in the Swedish Triss lottery
+#'
+#' This data set list the number of possible winning amounts and the number of tickets in each winning class for the Swedish Triss lottery.
+#'
+#' @format A data frame with 25 rows and 2 variables:
+#' \describe{
+#'   \item{vinst}{amount in each winning class}
+#'   \item{antal}{number of tickets in each winning class}
+#'   ...
+#' }
+#' @source Svenska spel \url{https://www.svenskaspel.se/triss/spelguide/triss-30}.
+"triss"
+
