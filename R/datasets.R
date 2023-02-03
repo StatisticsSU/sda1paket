@@ -56,3 +56,16 @@
 #' @source Svenska spel \url{https://www.svenskaspel.se/triss/spelguide/triss-30}.
 "triss"
 
+#' Daily percentage returns on Ericsson B stock
+#'
+#' This data set contains daily percentage returns on Ericsson B stock for all of year 2022
+#'
+#' @format A data frame with 25 rows and 2 variables:
+#' \describe{
+#'   \item{datum}{date in format YYYY-MM-DD}
+#'   \item{avkastning}{daily percentage returns 100*(log(x_t)-log(x_{t-1})}
+#'   ...
+#' }
+#' @source Nasdaq Nordic \url{https://www.nasdaqomxnordic.com/index/historiska_kurser?languageId=3&Instrument=SSE101}.
+"ericsson"
+
