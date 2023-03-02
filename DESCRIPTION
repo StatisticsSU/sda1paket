@@ -1,5 +1,5 @@
 Package: sda1
-Title: R-paket för kursen Statistik och dataanalys I vid SU
+Title: R-paket för kursen Statistik och dataanalys I, 15 hp vid SU
 Version: 0.0.1
 Authors@R: 
     person("Mattias", "Villani", , "mattias.villani@gmail.com", role = c("aut", "cre"),

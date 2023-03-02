@@ -4,7 +4,7 @@
 \name{sda1-package}
 \alias{sda1}
 \alias{sda1-package}
-\title{sda1: R-paket för kursen Statistik och dataanalys I vid SU}
+\title{sda1: R-paket för kursen Statistik och dataanalys I, 15 hp vid SU}
 \description{
 Funktioner för grundläggande statistik, inkl regression.
 }
