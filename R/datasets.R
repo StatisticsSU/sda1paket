@@ -91,3 +91,20 @@
 #' }
 #' @source Wegmann, B. and Villani, M. (2011). Bayesian Inference in Structural Second-Price Common Value Auctions, *Journal of Business and Economic Statistics*. \url{https://doi.org/10.1198/jbes.2011.08289}
 "ebaycoins"
+
+
+#' Determinants of life expectancy in 30 countries.
+#'
+#'
+#' @format A data frame with 30 rows and 3 variables:
+#' \describe{
+#'   \item{country}{Country name}
+#'   \item{spending}{Spending on health per capita in thousands of dollars per capita.}
+#'   \item{lifespan}{Life expectancy in years}
+#'   \item{doctorvisits}{average number of visits/consultations to the doctor}
+#'   \item{gdp}{gross domestic product per capita in thousands of dollars per capita.}
+#'   ...
+#' }
+#' @source Gelman, Hill and Vehtari (2020). Regression and other stories, *Cambridge University Press*. \url{https://avehtari.github.io/ROS-Examples/}
+#' @source OECD. \url{https://data.oecd.org/}
+"lifespan"

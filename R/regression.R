@@ -99,11 +99,11 @@ reg_summary <- function(lmobject, anova = T,  fit_measures = T, param = T,
 reg_predict <- function(formula, data, level = 0.95,
                              conf_int_line = T, pred_interval = T){
 
+  conf_int_line = T # Bug if we don't plot these. TODO
   fit <- lm(formula, data = data)
   data <- cbind(data, suppressWarnings(
                   predict(fit, data = data, interval = "prediction",
                   level = level)))
-
   p <- ggplot(data, aes(x = .data[[names(fit$model)[2]]],
                         y = .data[[names(fit$model)[1]]])) +
     {if (pred_interval) geom_ribbon(aes(ymin = lwr, ymax = upr),
