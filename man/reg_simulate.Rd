@@ -10,8 +10,11 @@ reg_simulate(
   sigma_eps,
   intercept = TRUE,
   covdist = "normal",
+  responsedist = "normal",
   rho_x = 0,
-  sigma_x = rep(1, length(betavect) - intercept)
+  sigma_x = rep(1, length(betavect) - intercept),
+  heteroparams = NA,
+  studentdf = NA
 )
 }
 \arguments{

@@ -146,8 +146,8 @@ reg_predict <- function(formula, data, level = 0.95,
 #' simdata <- reg_simulate(n = 500, betavect = c(1, -2, 1, 0), sigma_eps = 2)
 #' lmfit <- lm(y ~ X1 + X2 + X3, data = simdata)
 #' reg_summary(lmfit, anova = F)
-reg_simulate <- function(n, betavect, sigma_eps, intercept = TRUE, covdist = 'normal',
-                        rho_x = 0, sigma_x = rep(1,length(betavect)-intercept)){
+reg_simulate <- function(n, betavect, sigma_eps, intercept = TRUE, covdist = 'normal', responsedist = 'normal',
+                        rho_x = 0, sigma_x = rep(1,length(betavect)-intercept), heteroparams = NA, studentdf = NA){
 
   k = length(betavect) - intercept
 
@@ -163,8 +163,23 @@ reg_simulate <- function(n, betavect, sigma_eps, intercept = TRUE, covdist = 'no
   }
   if (intercept) X = cbind(1,X)
 
+  # Possibly heteroscedastic variance
+  if (is.function(sigma_eps)){
+    message("heteroscedastic errors")
+    if (is.na(heteroparams[1])) stop("need to specify argument heteroparams when sigma_eps is a function for heteroscedasticity")
+    sigma_eps = sigma_eps(X %*% heteroparams) # sigma_eps is then a vector with stdevs
+  }
+
   # Simulate responses
-  y = X%*%betavect + rnorm(n, sd = sigma_eps)
+  if (responsedist != 'normal' && responsedist != 'student')   stop("responsedist must be 'normal' or 'student'")
+  if (responsedist == 'normal'){
+    epsilons = rnorm(n, sd = sigma_eps)
+  }else{
+    message("student-t errors")
+    if (is.na(studentdf)) stop("Must specify dfstudent when using option responsedist == 'student")
+    epsilons = rt(n, df = studentdf)*sigma_eps
+  }
+  y = X%*%betavect + epsilons
 
   if (intercept) X = X[,-1] # remove intercept in the returned dataset
   data = data.frame(cbind(y,X))
@@ -273,9 +288,29 @@ reg_residuals <- function(lm_object){
           panel.grid.minor = element_blank())
 
   plot_grid(p1, p2, p3, p4)
-
-  #plt <- list(p1,p2,p3,p4)
 }
+
+
+#' Simulate from an AR(1) process
+#'
+#' Simulates `n` observations from
+#' \deqn{x_t = \mu + \phi(x_{t-1}-\mu) + \epsilon, \epsilon \sim N(0, \sigma_\epsilon)}{x_t = \mu + \phi(x_{t-1}-\mu) + \epsilon, \epsilon ~ N(0, \sigma_ \epsilon^2)}
+#' @export
+#' @examples
+#' library(sda1)
+#' simdata = simAR1(n, phi = 0.7, sigma_eps = 1)
+#' plot(simdata)
+
+simAR1 <- function(n, phi = 0.0, mu = 0, sigma_eps = 1){
+
+  n = 2*n # simulate double as many and then discard first half
+  x = rep(mu, n)
+  for (t in 2:n){
+    x[t] = mu + phi*(x[t-1] - mu) + rnorm(1, sd = sigma_eps)
+  }
+  return (x[(n/2+1):n])
+}
+
 
 
 
