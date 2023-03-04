@@ -7,6 +7,7 @@
 simAR1(n, phi = 0, mu = 0, sigma_eps = 1)
 }
 \description{
+Simulates \code{n} observations from
 \deqn{x_t = \mu + \phi(x_{t-1}-\mu) + \epsilon, \epsilon \sim N(0, \sigma_\epsilon)}{x_t = \mu + \phi(x_{t-1}-\mu) + \epsilon, \epsilon ~ N(0, \sigma_ \epsilon^2)}
 }
 \examples{

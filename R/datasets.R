@@ -96,7 +96,7 @@
 #' Determinants of life expectancy in 30 countries.
 #'
 #'
-#' @format A data frame with 30 rows and 3 variables:
+#' @format A data frame with 30 rows and 5 variables:
 #' \describe{
 #'   \item{country}{Country name}
 #'   \item{spending}{Spending on health per capita in thousands of dollars per capita.}
@@ -108,3 +108,28 @@
 #' @source Gelman, Hill and Vehtari (2020). Regression and other stories, *Cambridge University Press*. \url{https://avehtari.github.io/ROS-Examples/}
 #' @source OECD. \url{https://data.oecd.org/}
 "lifespan"
+
+
+#' Determinants of electricity cost for 1602 households from South Australia
+#'
+#'
+#' @format A data frame with 1602 rows and 3 variables:
+#' \describe{
+#'   \item{cost}{annual cost of electricity for a household in Australian dollars.}
+#'   \item{rooms}{number of rooms in the house.}
+#'   \item{people}{number of usual residents in the house}
+#'   \item{income}{annual pretax household income in Australian dollars}
+#'   \item{onlysecondary}{indicator for electric secondary heating only}
+#'   \item{waterheat}{indicator for peak electric water heating}
+#'   \item{cookel}{indicator for electric cooking only}
+#'   \item{poolfilt}{indicator for pool filter}
+#'   \item{airrev}{indicator for reverse cycle air conditioning}
+#'   \item{aircond}{indicator for air conditioning}
+#'   \item{microwave}{indicator for microwave}
+#'   \item{dish}{indicator for dishwasher}
+#'   \item{dryer}{indicator for dryer}
+#'   ...
+#' }
+#' @source Bartels, R., Fiebig, D. and Plumb, M. (1996). Gas or electricity, which is cheaper? An econometric approach with application to Australian expenditure data, The Energy Journal 17(4): 33–58.
+"electricitycost"
+

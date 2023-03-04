@@ -5,7 +5,7 @@
 \alias{lifespan}
 \title{Determinants of life expectancy in 30 countries.}
 \format{
-A data frame with 30 rows and 3 variables:
+A data frame with 30 rows and 5 variables:
 \describe{
 \item{country}{Country name}
 \item{spending}{Spending on health per capita in thousands of dollars per capita.}
