@@ -9,12 +9,12 @@ reg_simulate(
   betavect,
   sigma_eps,
   intercept = TRUE,
-  covdist = "normal",
   responsedist = "normal",
-  rho_x = 0,
-  sigma_x = rep(1, length(betavect) - intercept),
   heteroparams = NA,
-  studentdf = NA
+  studentdf = NA,
+  covdist = "normal",
+  rho_x = 0,
+  sigma_x = rep(1, length(betavect) - intercept)
 )
 }
 \arguments{
@@ -23,9 +23,16 @@ reg_simulate(
 \item{betavect}{a vector with regression coefficients
 c(beta_0,beta_1,...beta_k). First element is intercept if \code{intercept = TRUE}}
 
-\item{sigma_eps}{standard deviation of the error terms, epsilon.}
+\item{sigma_eps}{stdev of epsilon (homo) or
+a variance function sigma_eps(X \%*\% heteroparams) with parameters heteroparams.}
 
 \item{intercept}{if \code{TRUE} an intercept is added to the model.}
+
+\item{responsedist}{options: \code{'normal'} or \code{'student'}}
+
+\item{heteroparams}{parameters in the heteroscedastic variance function}
+
+\item{studentdf}{degrees of freedom in the student-t errors}
 
 \item{covdist}{distribution of the covariates. Options: \code{'normal'} or \code{'uniform'}.}
 
@@ -38,9 +45,12 @@ dataframe with simulated data (y, X1, X2, ..., XK) (no intercept included).
 }
 \description{
 Simulates a dataset with \code{n} observation from the linear regression model
-\deqn{y = \beta_0 + \beta_1 x_1 + \ldots + \beta_k x_k + \epsilon, \epsilon \sim N(0, \sigma_\epsilon^2)}{y = \beta_0 + \beta_1 * x_1 + ... + \beta_k * x_k + \epsilon, \epsilon ~ N(0, \sigma_ \epsilon^2)}
-with covariates (x) simulated from a normal distribution with the same correlation \code{rho_x} \cr
-between all pairs of covariates. Covariate \eqn{x_j}{x_j} has standard deviation \code{sigma_x[j]}. \cr
+\deqn{y = \beta_0 + \beta_1 x_1 + \ldots + \beta_k x_k + \epsilon}{y = \beta_0 + \beta_1 * x_1 + ... + \beta_k * x_k + \epsilon, \epsilon ~ N(0, \sigma_ \epsilon^2)}
+where the errors \eqn{\epsilon}{\epsilon} have zero mean and standard deviation \eqn{\sigma_ \epsilon}{\sigma_ \epsilon}, but can follow either normal or student-t distribution.
+The variance can be homoscedastic or heteroscedastic with standard deviation function \eqn{\sigma_ \epsilon(x_1\gamma_1+\ldots+x_k \gamma_k)}{\sigma_ \epsilon(x_1\gamma_1+...+x_k \gamma_k)},
+where the \eqn{(\gamma_1,\ldots,\gamma_k)}{(\gamma_1,...,\gamma_k)} vector of variance function parameters are given by the argument \code{heteroparams}.
+The covariates (x) are simulated from a normal distribution with the same correlation \code{rho_x}
+between all pairs of covariates, and covariate \eqn{x_j}{x_j} has standard deviation \code{sigma_x[j]}.
 Alternatively the covariate can follow a uniform distribution.
 }
 \examples{
@@ -48,4 +58,9 @@ library(sda1)
 simdata <- reg_simulate(n = 500, betavect = c(1, -2, 1, 0), sigma_eps = 2)
 lmfit <- lm(y ~ X1 + X2 + X3, data = simdata)
 reg_summary(lmfit, anova = F)
+
+# Simulate from a heteroscedastic student-t regression and detect problems with residuals
+simdata <- reg_simulate(n = 500, betavect = c(1, -2, 1, 0), sigma_eps = exp, heteroparam = c(0,1,0,0), responsedist = 'student', studentdf = 4)
+lmfit <- lm(y ~ X1 + X2 + X3, data = simdata)
+reg_residuals(lmfit)
 }

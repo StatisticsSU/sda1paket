@@ -127,15 +127,22 @@ reg_predict <- function(formula, data, level = 0.95,
 #' Simulate from a linear regression model
 #'
 #' Simulates a dataset with `n` observation from the linear regression model
-#' \deqn{y = \beta_0 + \beta_1 x_1 + \ldots + \beta_k x_k + \epsilon, \epsilon \sim N(0, \sigma_\epsilon^2)}{y = \beta_0 + \beta_1 * x_1 + ... + \beta_k * x_k + \epsilon, \epsilon ~ N(0, \sigma_ \epsilon^2)}
-#' with covariates (x) simulated from a normal distribution with the same correlation `rho_x` \cr
-#' between all pairs of covariates. Covariate \eqn{x_j}{x_j} has standard deviation `sigma_x[j]`. \cr
+#' \deqn{y = \beta_0 + \beta_1 x_1 + \ldots + \beta_k x_k + \epsilon}{y = \beta_0 + \beta_1 * x_1 + ... + \beta_k * x_k + \epsilon, \epsilon ~ N(0, \sigma_ \epsilon^2)}
+#' where the errors \eqn{\epsilon}{\epsilon} have zero mean and standard deviation \eqn{\sigma_ \epsilon}{\sigma_ \epsilon}, but can follow either normal or student-t distribution.
+#' The variance can be homoscedastic or heteroscedastic with standard deviation function \eqn{\sigma_ \epsilon(x_1\gamma_1+\ldots+x_k \gamma_k)}{\sigma_ \epsilon(x_1\gamma_1+...+x_k \gamma_k)},
+#' where the \eqn{(\gamma_1,\ldots,\gamma_k)}{(\gamma_1,...,\gamma_k)} vector of variance function parameters are given by the argument `heteroparams`.
+#' The covariates (x) are simulated from a normal distribution with the same correlation `rho_x`
+#' between all pairs of covariates, and covariate \eqn{x_j}{x_j} has standard deviation `sigma_x[j]`.
 #' Alternatively the covariate can follow a uniform distribution.
 #' @param n the number of observations in the simulated dataset.
 #' @param betavect a vector with regression coefficients
 #' c(beta_0,beta_1,...beta_k). First element is intercept if `intercept = TRUE`
-#' @param sigma_eps standard deviation of the error terms, epsilon.
+#' @param sigma_eps stdev of epsilon (homo) or
+#' a variance function sigma_eps(X %*% heteroparams) with parameters heteroparams.
 #' @param intercept if `TRUE` an intercept is added to the model.
+#' @param responsedist options: `'normal'` or `'student'`
+#' @param heteroparams parameters in the heteroscedastic variance function
+#' @param studentdf degrees of freedom in the student-t errors
 #' @param covdist distribution of the covariates. Options: `'normal'` or `'uniform'`.
 #' @param rho_x correlation among the covariates. Same for all covariate pairs.
 #' @param sigma_x vector with standard deviation of the covariates.
@@ -146,9 +153,15 @@ reg_predict <- function(formula, data, level = 0.95,
 #' simdata <- reg_simulate(n = 500, betavect = c(1, -2, 1, 0), sigma_eps = 2)
 #' lmfit <- lm(y ~ X1 + X2 + X3, data = simdata)
 #' reg_summary(lmfit, anova = F)
-reg_simulate <- function(n, betavect, sigma_eps, intercept = TRUE, covdist = 'normal', responsedist = 'normal',
-                        rho_x = 0, sigma_x = rep(1,length(betavect)-intercept), heteroparams = NA, studentdf = NA){
-
+#'
+#' # Simulate from a heteroscedastic student-t regression and detect problems with residuals
+#' simdata <- reg_simulate(n = 500, betavect = c(1, -2, 1, 0), sigma_eps = exp, heteroparam = c(0,1,0,0), responsedist = 'student', studentdf = 4)
+#' lmfit <- lm(y ~ X1 + X2 + X3, data = simdata)
+#' reg_residuals(lmfit)
+reg_simulate <- function(n, betavect, sigma_eps, intercept = TRUE, responsedist = 'normal',
+                         heteroparams = NA, studentdf = NA, covdist = 'normal',
+                         rho_x = 0, sigma_x = rep(1,length(betavect)-intercept))
+{
   k = length(betavect) - intercept
 
   # Generate covariates
