@@ -190,7 +190,7 @@ reg_simulate <- function(n, betavect, sigma_eps, intercept = TRUE, responsedist 
     sigma_eps = sigma_eps(X %*% heteroparams) # sigma_eps is then a vector with stdevs
   }
 
-  # Simulate responses
+  # Simulate epsilons
   if (responsedist != 'normal' && responsedist != 'student')   stop("responsedist must be 'normal' or 'student'")
   if (responsedist == 'normal'){epsilons = rnorm(n, sd = sigma_eps)}
   else{
@@ -198,7 +198,10 @@ reg_simulate <- function(n, betavect, sigma_eps, intercept = TRUE, responsedist 
       if (is.na(studentdf)) stop("Must specify dfstudent when using option responsedist == 'student")
       epsilons = rt(n, df = studentdf)*sigma_eps
   }
+  # Making the epsilons autocorrelated with AR(1)
   if (!is.na(ar1phi)){epsilons = simAR1(n = length(epsilons), phi = ar1phi, sigma_eps = 1, epsilons = epsilons)}
+
+  # Compute the final responses
   y = X%*%betavect + epsilons
 
   if (intercept) X = X[,-1] # remove intercept in the returned dataset
