@@ -4,7 +4,7 @@
 \alias{simAR1}
 \title{Simulate from an AR(1) process}
 \usage{
-simAR1(n, phi = 0, mu = 0, sigma_eps = 1)
+simAR1(n, phi = 0, mu = 0, sigma_eps = 1, epsilons = NA)
 }
 \description{
 Simulates \code{n} observations from
@@ -12,6 +12,6 @@ Simulates \code{n} observations from
 }
 \examples{
 library(sda1)
-simdata = simAR1(n, phi = 0.7, sigma_eps = 1)
+simdata = simAR1(n = 100, phi = 0.7, sigma_eps = 1)
 plot(simdata)
 }

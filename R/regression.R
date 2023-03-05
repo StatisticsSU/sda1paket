@@ -130,7 +130,8 @@ reg_predict <- function(formula, data, level = 0.95,
 #' \deqn{y = \beta_0 + \beta_1 x_1 + \ldots + \beta_k x_k + \epsilon}{y = \beta_0 + \beta_1 * x_1 + ... + \beta_k * x_k + \epsilon, \epsilon ~ N(0, \sigma_ \epsilon^2)}
 #' where the errors \eqn{\epsilon}{\epsilon} have zero mean and standard deviation \eqn{\sigma_ \epsilon}{\sigma_ \epsilon}, but can follow either normal or student-t distribution.
 #' The variance can be homoscedastic or heteroscedastic with standard deviation function \eqn{\sigma_ \epsilon(x_1\gamma_1+\ldots+x_k \gamma_k)}{\sigma_ \epsilon(x_1\gamma_1+...+x_k \gamma_k)},
-#' where the \eqn{(\gamma_1,\ldots,\gamma_k)}{(\gamma_1,...,\gamma_k)} vector of variance function parameters are given by the argument `heteroparams`.
+#' where the \eqn{(\gamma_1,\ldots,\gamma_k)}{(\gamma_1,...,\gamma_k)} vector of variance function parameters are given by the argument `heteroparams`. The \eqn{\epsilon}{\epsilon} can also have
+#' an AR(1) autocorrelation structure with coefficient on first lag given by the argument ar1phi.
 #' The covariates (x) are simulated from a normal distribution with the same correlation `rho_x`
 #' between all pairs of covariates, and covariate \eqn{x_j}{x_j} has standard deviation `sigma_x[j]`.
 #' Alternatively the covariate can follow a uniform distribution.
@@ -143,6 +144,7 @@ reg_predict <- function(formula, data, level = 0.95,
 #' @param responsedist options: `'normal'` or `'student'`
 #' @param heteroparams parameters in the heteroscedastic variance function
 #' @param studentdf degrees of freedom in the student-t errors
+#' @param ar1phi AR(1) coefficient on first lag for autocorrelated errors
 #' @param covdist distribution of the covariates. Options: `'normal'` or `'uniform'`.
 #' @param rho_x correlation among the covariates. Same for all covariate pairs.
 #' @param sigma_x vector with standard deviation of the covariates.
@@ -158,9 +160,14 @@ reg_predict <- function(formula, data, level = 0.95,
 #' simdata <- reg_simulate(n = 500, betavect = c(1, -2, 1, 0), sigma_eps = exp, heteroparam = c(0,1,0,0), responsedist = 'student', studentdf = 4)
 #' lmfit <- lm(y ~ X1 + X2 + X3, data = simdata)
 #' reg_residuals(lmfit)
+#'
+#' #' # Simulate from a homoscedastic student-t regression with autocorrelated errors.
+#' simdata <- reg_simulate(n = 500, betavect = c(1, -2, 1, 0), sigma_eps = 2, responsedist = 'student', studentdf = 4, ar1phi = 0.9)
+#' lmfit <- lm(y ~ X1 + X2 + X3, data = simdata)
+#' reg_residuals(lmfit)
 reg_simulate <- function(n, betavect, sigma_eps, intercept = TRUE, responsedist = 'normal',
-                         heteroparams = NA, studentdf = NA, covdist = 'normal',
-                         rho_x = 0, sigma_x = rep(1,length(betavect)-intercept))
+                         heteroparams = NA, studentdf = NA, ar1phi = NA,
+                         covdist = 'normal', rho_x = 0, sigma_x = rep(1,length(betavect)-intercept))
 {
   k = length(betavect) - intercept
 
@@ -185,13 +192,13 @@ reg_simulate <- function(n, betavect, sigma_eps, intercept = TRUE, responsedist 
 
   # Simulate responses
   if (responsedist != 'normal' && responsedist != 'student')   stop("responsedist must be 'normal' or 'student'")
-  if (responsedist == 'normal'){
-    epsilons = rnorm(n, sd = sigma_eps)
-  }else{
-    message("student-t errors")
-    if (is.na(studentdf)) stop("Must specify dfstudent when using option responsedist == 'student")
-    epsilons = rt(n, df = studentdf)*sigma_eps
+  if (responsedist == 'normal'){epsilons = rnorm(n, sd = sigma_eps)}
+  else{
+      message("student-t errors")
+      if (is.na(studentdf)) stop("Must specify dfstudent when using option responsedist == 'student")
+      epsilons = rt(n, df = studentdf)*sigma_eps
   }
+  if (!is.na(ar1phi)){epsilons = simAR1(n = length(epsilons), phi = ar1phi, sigma_eps = 1, epsilons = epsilons)}
   y = X%*%betavect + epsilons
 
   if (intercept) X = X[,-1] # remove intercept in the returned dataset
@@ -311,17 +318,16 @@ reg_residuals <- function(lm_object){
 #' @export
 #' @examples
 #' library(sda1)
-#' simdata = simAR1(n, phi = 0.7, sigma_eps = 1)
+#' simdata = simAR1(n = 100, phi = 0.7, sigma_eps = 1)
 #' plot(simdata)
 
-simAR1 <- function(n, phi = 0.0, mu = 0, sigma_eps = 1){
-
-  n = 2*n # simulate double as many and then discard first half
-  x = rep(mu, n)
+simAR1 <- function(n, phi = 0.0, mu = 0, sigma_eps = 1, epsilons = NA){
+  x = rep(mu, n) # start at steady state
+  if (is.na(epsilons[1])){epsilons = rnorm(n, sd = sigma_eps)}
   for (t in 2:n){
-    x[t] = mu + phi*(x[t-1] - mu) + rnorm(1, sd = sigma_eps)
+    x[t] = mu + phi*(x[t-1] - mu) + epsilons[t]
   }
-  return (x[(n/2+1):n])
+  return (x)
 }
 
 

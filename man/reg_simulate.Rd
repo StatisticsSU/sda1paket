@@ -12,6 +12,7 @@ reg_simulate(
   responsedist = "normal",
   heteroparams = NA,
   studentdf = NA,
+  ar1phi = NA,
   covdist = "normal",
   rho_x = 0,
   sigma_x = rep(1, length(betavect) - intercept)
@@ -34,6 +35,8 @@ a variance function sigma_eps(X \%*\% heteroparams) with parameters heteroparams
 
 \item{studentdf}{degrees of freedom in the student-t errors}
 
+\item{ar1phi}{AR(1) coefficient on first lag for autocorrelated errors}
+
 \item{covdist}{distribution of the covariates. Options: \code{'normal'} or \code{'uniform'}.}
 
 \item{rho_x}{correlation among the covariates. Same for all covariate pairs.}
@@ -48,7 +51,8 @@ Simulates a dataset with \code{n} observation from the linear regression model
 \deqn{y = \beta_0 + \beta_1 x_1 + \ldots + \beta_k x_k + \epsilon}{y = \beta_0 + \beta_1 * x_1 + ... + \beta_k * x_k + \epsilon, \epsilon ~ N(0, \sigma_ \epsilon^2)}
 where the errors \eqn{\epsilon}{\epsilon} have zero mean and standard deviation \eqn{\sigma_ \epsilon}{\sigma_ \epsilon}, but can follow either normal or student-t distribution.
 The variance can be homoscedastic or heteroscedastic with standard deviation function \eqn{\sigma_ \epsilon(x_1\gamma_1+\ldots+x_k \gamma_k)}{\sigma_ \epsilon(x_1\gamma_1+...+x_k \gamma_k)},
-where the \eqn{(\gamma_1,\ldots,\gamma_k)}{(\gamma_1,...,\gamma_k)} vector of variance function parameters are given by the argument \code{heteroparams}.
+where the \eqn{(\gamma_1,\ldots,\gamma_k)}{(\gamma_1,...,\gamma_k)} vector of variance function parameters are given by the argument \code{heteroparams}. The \eqn{\epsilon}{\epsilon} can also have
+an AR(1) autocorrelation structure with coefficient on first lag given by the argument ar1phi.
 The covariates (x) are simulated from a normal distribution with the same correlation \code{rho_x}
 between all pairs of covariates, and covariate \eqn{x_j}{x_j} has standard deviation \code{sigma_x[j]}.
 Alternatively the covariate can follow a uniform distribution.
@@ -61,6 +65,11 @@ reg_summary(lmfit, anova = F)
 
 # Simulate from a heteroscedastic student-t regression and detect problems with residuals
 simdata <- reg_simulate(n = 500, betavect = c(1, -2, 1, 0), sigma_eps = exp, heteroparam = c(0,1,0,0), responsedist = 'student', studentdf = 4)
+lmfit <- lm(y ~ X1 + X2 + X3, data = simdata)
+reg_residuals(lmfit)
+
+#' # Simulate from a homoscedastic student-t regression with autocorrelated errors.
+simdata <- reg_simulate(n = 500, betavect = c(1, -2, 1, 0), sigma_eps = 2, responsedist = 'student', studentdf = 4, ar1phi = 0.9)
 lmfit <- lm(y ~ X1 + X2 + X3, data = simdata)
 reg_residuals(lmfit)
 }
