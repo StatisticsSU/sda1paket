@@ -199,7 +199,7 @@ reg_simulate <- function(n, betavect, sigma_eps, intercept = TRUE, responsedist 
       epsilons = rt(n, df = studentdf)*sigma_eps
   }
   # Making the epsilons autocorrelated with AR(1)
-  if (!is.na(ar1phi)){epsilons = simAR1(n = length(epsilons), phi = ar1phi, sigma_eps = 1, epsilons = epsilons)}
+  if (!is.na(ar1phi)){epsilons = simAR1(n = length(epsilons), phi = ar1phi, sigma_eps = 1, epsilons = sqrt(1-ar1phi^2)*epsilons)}
 
   # Compute the final responses
   y = X%*%betavect + epsilons
