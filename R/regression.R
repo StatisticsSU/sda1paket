@@ -295,7 +295,9 @@ reg_residuals <- function(lm_object){
     ggplot(aes(x = residuals)) +
     geom_histogram(aes(y = after_stat(density)),
                    bins = 1 + log(n,2), fill = prettycol[1]) +
-    geom_density(kernel = "gaussian", color = prettycol[4]) +
+    stat_function(fun = dnorm, n = 101,
+                  args = list(mean = 0, sd = sd(lm_object$model$residuals)),
+                  color = prettycol[4]) +
     theme_light() +
     theme(panel.grid.major = element_blank(),
           panel.grid.minor = element_blank())
